@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Keybind Roulette for League of Legends</title>
+    <link rel="stylesheet" href="../css/main.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Keybind Roulette for League of Legends</h1>
+      <h2>The <em>best</em> way to ruin your rank</h2>
+      <h3>Where's your config file?</h3>
+      <div class="controlContainer">
+        <input id="configLocation" type="text" name="" value="Path/To/Your/Config.cfg">
+        <button type="button" name="button" class='browseFile'>Browse</button>
+      </div>
+      <div class="controlContainer">
+        <h3>How much roulette?</h3>
+        <input onInput="scrambleChange(this)" id="scramble" type="range" name="" value="50" min="0" max="100">
+        <p class='scrambleText'>Maybe too much</p>
+      </div>
+      <button id="doIt" type="button" name="button">Scramble</button>
+      <div class='keybinds'>
+        <div class="keybindName">
+          Recall
+        </div>
+        <div class="oldKeybind">
+          B
+        </div>
+        <div class="newKeybind">
+          H
+        </div>
+
+      </div>
+    </div>
+    <script src="../../renderer.js"></script>
+    <script src="../js/script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,62 @@
+body {
+  background: black;
+  color:white;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.controlContainer {
+  width:100%;
+  max-width: 300px
+}
+
+#configLocation {
+  padding:10px;
+  border-radius: 3px;
+  border:none;
+  width:70%;
+}
+
+.controlContainer button {
+  padding: 10px;
+  border-radius: 3px;
+  border:none;
+  background: orange;
+}
+
+#scramble {
+  width:100%;
+}
+
+#doIt {
+  padding:20px 80px;
+  background: green;
+  font-size: 22px;
+  border: none;
+  border-radius: 3px;
+}
+
+.keybinds {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  width: 100%;
+  max-width: 500px;
+  margin-top: 20px;
+  place-items: flex-start;
+  border: 1px solid;
+}
+
+.keybindName {
+  grid-column: 1/2;
+}
+.oldKeybind {
+  grid-column: 2/3;
+}
+.newKeybind {
+  grid-column: 3/4;
+}
