@@ -1,6 +1,15 @@
 body {
   background: black;
-  color:white;
+  color:#cccccc;
+  font-family: 'Cabin Condensed', sans-serif;
+}
+
+.h1 {
+  font-weight: 700;
+}
+em {
+  font-weight: 700;
+  color:#ff9a00;
 }
 .container {
   display: flex;
@@ -20,38 +29,65 @@ body {
   border-radius: 3px;
   border:none;
   width:70%;
+  background: #c7c7c7;
 }
 
 .controlContainer button {
   padding: 10px;
   border-radius: 3px;
   border:none;
-  background: orange;
+  background: #ff9a00;
+  transition: 0.5s ease-in-out;
+  cursor: pointer;
+}
+
+.controlContainer button:hover {
+  background:#f1b252
 }
 
 #scramble {
   width:100%;
 }
 
+
 #doIt {
   padding:20px 80px;
-  background: green;
-  font-size: 22px;
+  background: #308c30;
   border: none;
   border-radius: 3px;
+  transition:background 0.5s ease-in-out;
+  font-weight: 600;
+  font-size: 24px;
+}
+
+#doIt:hover{
+  background: #097709;
+  cursor:pointer;
+  animation-play-state: running;
+  animation: rotate360 1s linear infinite;  /* animation set */
+  animation-direction: alternate;
+  box-shadow: 0px 0px 15px 6px #b6c700
+}
+
+@keyframes rotate360 {
+  from {transform: rotate(-10deg) ;}
+  to { transform: rotate(10deg); }
 }
 
 .titles {
-  display: grid;
+  display: none;
   grid-template-columns: 2fr 1fr 1fr;
   width: 100%;
   max-width: 500px;
   place-items: center;
   margin-top: 10px;
 }
+.titles div {
+  font-size: 26px;
+}
 
 .keybinds {
-  display: grid;
+  display: none;
   grid-template-columns: 2fr 1fr 1fr;
   width: 100%;
   max-width: 500px;
@@ -59,8 +95,10 @@ body {
   border: 1px solid;
 }
 
-.cell {
-  padding: 10px
+.keyCell {
+  padding: 8px;
+  font-weight: 400;
+  font-size: 20px;
 }
 
 .keybindName {
@@ -71,4 +109,12 @@ body {
 }
 .newKeybind {
   grid-column: 3/4;
+}
+
+.invalidConfig {
+  border: 3px solid red!important;
+}
+
+.showKeybinds {
+  display: grid;
 }

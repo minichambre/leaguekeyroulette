@@ -164,10 +164,15 @@ document.querySelector('.browseFile').addEventListener('click', function (event)
 });
 
 document.querySelector('#doIt').addEventListener('click', function() {
-  if (document.querySelector('#configLocation').value === ''){
-    console.log('do something')
+  let configInput =document.querySelector('#configLocation');
+  configInput.classList.remove('invalidConfig');
+  if (configInput.value === ''){
+    configInput.classList.add('invalidConfig')
     return;
   }
+
+  document.querySelector('.keybinds').classList.remove('showKeybinds')
+  document.querySelector('.titles').classList.remove('showKeybinds');
 
 
   let desiredBinds = [
@@ -207,6 +212,8 @@ document.querySelector('#doIt').addEventListener('click', function() {
 
 function readConfig(location, desiredBinds, smartOptions){
   fileAsArray = [];
+  let found = 0;
+  let totalNeeded = desiredBinds.length;
   let index = 0;
   var lineReader = require('readline').createInterface({
     input: require('fs').createReadStream(location)
@@ -216,7 +223,8 @@ function readConfig(location, desiredBinds, smartOptions){
     fileAsArray.push(line);
     desiredBinds.some((name) => {
       if (line.includes(name)){
-        keybinds[name].old = line.substring(line.indexOf('[')+1, line.length-1);
+        found++;
+        keybinds[name].old = line.substring(line.indexOf('['), line.length);
         keybinds[name].arrayIndex = index;
         desiredBinds = desiredBinds.filter(item => item !== name)
       }
@@ -234,6 +242,10 @@ function readConfig(location, desiredBinds, smartOptions){
 
 
   lineReader.on('close', () =>{
+    if (found != totalNeeded) {
+      document.querySelector('#configLocation').classList.add('invalidConfig');
+      return;
+    }
     generateBindings(location)
     console.log(keybinds);
     writeToDom();
@@ -312,23 +324,26 @@ function writeBindings(location) {
 
 function writeToDom() {
   let keybindContainer = document.querySelector('.keybinds');
+  keybindContainer.innerHTML = ""
   for (var entry in keybinds) {
     let key = keybinds[entry]
     let keybindName = document.createElement('div')
-    keybindName.classList.add('keyBindName');
+    keybindName.classList.add('keyBindName','keyCell');
     keybindName.innerHTML = key.friendlyName;
     keybindContainer.append(keybindName)
 
     let oldKeybind = document.createElement('div')
-    oldKeybind.classList.add('keyBindName');
+    oldKeybind.classList.add('keyBindName','keyCell');
     oldKeybind.innerHTML = key.old;
     keybindContainer.append(oldKeybind)
 
     let newKeybind = document.createElement('div')
-    newKeybind.classList.add('keyBindName');
+    newKeybind.classList.add('keyBindName','keyCell');
     newKeybind.innerHTML = key.new;
     keybindContainer.append(newKeybind)
   }
+  keybindContainer.classList.add('showKeybinds')
+  document.querySelector('.titles').classList.add('showKeybinds');
 }
 
 function scrambleChange(element) {
