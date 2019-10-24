@@ -41,14 +41,26 @@ body {
   border-radius: 3px;
 }
 
+.titles {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  width: 100%;
+  max-width: 500px;
+  place-items: center;
+  margin-top: 10px;
+}
+
 .keybinds {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   width: 100%;
   max-width: 500px;
-  margin-top: 20px;
-  place-items: flex-start;
+  place-items: center;
   border: 1px solid;
+}
+
+.cell {
+  padding: 10px
 }
 
 .keybindName {
