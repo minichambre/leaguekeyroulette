@@ -4,7 +4,7 @@
 // `nodeIntegration` is turned off. Use `preload.js` to
 // selectively enable features needed in the rendering
 // process.
-
+const fs = require('fs')
 var scrambleSetting = 2;
 var fileAsArray = [];
 var keybinds = {
@@ -211,52 +211,53 @@ document.querySelector('#doIt').addEventListener('click', function() {
 })
 
 function readConfig(location, desiredBinds, smartOptions){
-  fileAsArray = [];
-  let found = 0;
+  let settingsFileJson = "";
   let totalNeeded = desiredBinds.length;
-  let index = 0;
-  var lineReader = require('readline').createInterface({
-    input: require('fs').createReadStream(location)
-  });
+  let errorReading = false;
+  try {
+    if (fs.existsSync(location)) {
+      //file exists
+      settingsFileJson = require(location)
+    }
+  } catch(err) {
+    console.log(err)
+    document.querySelector('#configLocation').classList.add('invalidConfig');
+    return;
+  }
 
-  lineReader.on('line', function (line) {
-    fileAsArray.push(line);
-    desiredBinds.some((name) => {
-      if (line.includes(name)){
+  console.log(settingsFileJson)
+
+  let input = settingsFileJson.files[1].sections[0].settings;
+  let found = 0;
+  desiredBinds.some((name) => {
+    let index = 0;
+    for (key in input) {
+      if (input[key].name.includes(name)) {
         found++;
-        keybinds[name].old = line.substring(line.indexOf('['), line.length);
+        keybinds[name].old = input[key].value;
         keybinds[name].arrayIndex = index;
         desiredBinds = desiredBinds.filter(item => item !== name)
       }
-    })
-
-    smartOptions.some((name) => {
-      if (line.includes(name)){
-        console.log('match')
-        smart[name].old = line.substring(line.indexOf('=')+1)
-        smartOptions = smartOptions.filter(item => item !== name)
-      }
-    })
-    index++;
-  });
-
-
-  lineReader.on('close', () =>{
-    if (found != totalNeeded) {
-      document.querySelector('#configLocation').classList.add('invalidConfig');
-      return;
+      index++;
     }
-    generateBindings(location)
-    console.log(keybinds);
-    writeToDom();
-  });
+  })
+
+  if (found != totalNeeded) {
+    document.querySelector('#configLocation').classList.add('invalidConfig');
+    return;
+  }
+  console.log(keybinds);
+
+  generateBindings(location, settingsFileJson)
+  console.log(keybinds);
+  writeToDom();
 }
 
-function generateBindings(location) {
+function generateBindings(location, settingsFileJson) {
   for (var entry in keybinds){
     keybinds[entry].new = makeBind()
   }
-  writeBindings(location);
+  writeBindings(location, settingsFileJson);
 }
 
 
@@ -295,31 +296,32 @@ function makeBind() {
   return randomKeybind
 }
 
-function writeBindings(location) {
+function writeBindings(location,settingsFileJson) {
   for (let entry in keybinds) {
-    let lineToChange = fileAsArray[keybinds[entry].arrayIndex];
-    lineToChange = lineToChange.substring(0,lineToChange.indexOf('=')+1);
-    lineToChange+= keybinds[entry].new;
-    fileAsArray[keybinds[entry].arrayIndex] = lineToChange
+    settingsFileJson.files[1].sections[0].settings[keybinds[entry].arrayIndex].value = keybinds[entry].new;
   }
-  const fs = require('fs');
-  const writeStream = fs.createWriteStream(location);
-  const pathName = writeStream.path;
-
-  // write each value of the array on the file breaking line
-  fileAsArray.forEach(value => writeStream.write(`${value}\n`));
-
-  // the finish event is emitted when all data has been flushed from the stream
-  writeStream.on('finish', () => {
-     console.log(`wrote all the array data to file ${pathName}`);
+  let newJson = JSON.stringify(settingsFileJson);
+  fs.writeFile(location, newJson, 'utf8', (err) => {
+    console.log(err);
   });
-
-  // handle the errors on the write process
-  writeStream.on('error', (err) => {
-      console.error(`There is an error writing the file ${pathName} => ${err}`)
-  });
-
-  // close the stream
+  // const fs = require('fs');
+  // const writeStream = fs.createWriteStream(location);
+  // const pathName = writeStream.path;
+  //
+  // // write each value of the array on the file breaking line
+  // fileAsArray.forEach(value => writeStream.write(`${value}\n`));
+  //
+  // // the finish event is emitted when all data has been flushed from the stream
+  // writeStream.on('finish', () => {
+  //    console.log(`wrote all the array data to file ${pathName}`);
+  // });
+  //
+  // // handle the errors on the write process
+  // writeStream.on('error', (err) => {
+  //     console.error(`There is an error writing the file ${pathName} => ${err}`)
+  // });
+  //
+  // // close the stream
 }
 
 function writeToDom() {

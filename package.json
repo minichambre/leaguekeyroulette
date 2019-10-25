@@ -21,5 +21,8 @@
   },
   "dependencies": {
     "electron-reload": "^1.5.0"
+  },
+  "pkg": {
+    "assets": "assets/css/*"
   }
 }
