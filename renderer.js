@@ -1,169 +1,73 @@
-// This file is required by the index.html file and will
-// be executed in the renderer process for that window.
-// No Node.js APIs are available in this process because
-// `nodeIntegration` is turned off. Use `preload.js` to
-// selectively enable features needed in the rendering
-// process.
+
 const fs = require('fs')
+const dialog = require('electron').remote.dialog
+
 var scrambleSetting = 2;
-var fileAsArray = [];
 var keybinds = {
   evtUseItem1: {
-    old: '',
-    new: '',
-    friendlyName: 'Item 1',
-    arrayIndex: 0
+    friendlyName: 'Item 1'
   },
   evtUseItem2: {
-    old: '',
-    new: '',
-    friendlyName: 'Item 2',
-    arrayIndex: 0
+    friendlyName: 'Item 2'
   },
   evtUseItem3: {
-    old: '',
-    new: '',
-    friendlyName: 'Item 3',
-    arrayIndex: 0
+    friendlyName: 'Item 3'
   },
   evtUseItem4: {
-    old: '',
-    new: '',
-    friendlyName: 'Item 4',
-    arrayIndex: 0
+    friendlyName: 'Item 4'
   },
   evtUseItem5:{
-    old: '',
-    new: '',
-    friendlyName: 'Item 5',
-    arrayIndex: 0
+    friendlyName: 'Item 5'
   },
   evtUseItem6: {
-    old: '',
-    new: '',
-    friendlyName: 'Item 6',
-    arrayIndex: 0
+    friendlyName: 'Item 6'
   },
   evtUseItem7: {
-    old: '',
-    new: '',
-    friendlyName: 'Recall',
-    arrayIndex: 0
+    friendlyName: 'Recall'
   },
   evtUseVisionItem: {
-    old: '',
-    new: '',
     friendlyName: 'Ward',
-    arrayIndex: 0
   },
   evtCastSpell4: {
-    old: '',
-    new: '',
     friendlyName: 'Ult',
-    arrayIndex: 0
   },
   evtCastSpell3:{
-    old: '',
-    new: '',
     friendlyName: 'E',
-    arrayIndex: 0
   },
   evtCastSpell2:{
-    old: '',
-    new: '',
     friendlyName: 'W',
-    arrayIndex: 0
   },
   evtCastSpell1:{
-    old: '',
-    new: '',
     friendlyName: 'Q',
-    arrayIndex: 0
   },
   evtCastAvatarSpell2: {
-    old: '',
-    new: '',
     friendlyName: 'Summoner Spell 2',
-    arrayIndex: 0
   },
   evtCastAvatarSpell1: {
-    old: '',
-    new: '',
     friendlyName: 'Summoner Spell 1',
-    arrayIndex: 0
   }
 };
 
-var smart = {
-  evtUseVisionItemsmart: {
-    old: '',
-    new: ''
-  },
-  evtUseItem6smart: {
-    old: '',
-    new: ''
-  },
-  evtUseItem5smart: {
-    old: '',
-    new: ''
-  },
-  evtUseItem4smart: {
-    old: '',
-    new: ''
-  },
-  evtUseItem3smart: {
-    old: '',
-    new: ''
-  },
-  evtUseItem2smart: {
-    old: '',
-    new: ''
-  },
-  evtUseItem1smart: {
-    old: '',
-    new: ''
-  },
-  evtCastSpell4smart: {
-    old: '',
-    new: ''
-  },
-  evtCastSpell3smart: {
-    old: '',
-    new: ''
-  },
-  evtCastSpell2smart: {
-    old: '',
-    new: ''
-  },
-  evtCastSpell1smart: {
-    old: '',
-    new: ''
-  },
-  evtCastAvatarSpell2smart: {
-    old: '',
-    new: ''
-  },
-  evtCastAvatarSpell1smart: {
-    old: '',
-    new: ''
-  }
-}
 
 
-const dialog = require('electron').remote.dialog
 
+//When they browse to a file path
 document.querySelector('.browseFile').addEventListener('click', function (event) {
   dialog.showOpenDialog({
     properties: ['openFile']
   }).then(result => {
-    console.log(result.filePaths)
+    //Set the file path to the input value
     document.querySelector('#configLocation').value = result.filePaths
   }).catch(err => {
+    //Error getting the file path
     console.log(err)
   })
 });
 
+//When they press the scramble button, setting things in motion
 document.querySelector('#doIt').addEventListener('click', function() {
+
+  //Start by verifying the config file string isnt null
   let configInput =document.querySelector('#configLocation');
   configInput.classList.remove('invalidConfig');
   if (configInput.value === ''){
@@ -171,10 +75,11 @@ document.querySelector('#doIt').addEventListener('click', function() {
     return;
   }
 
+  //Set the error messages to disappear
   document.querySelector('.keybinds').classList.remove('showKeybinds')
   document.querySelector('.titles').classList.remove('showKeybinds');
 
-
+  //These are the keybinds we're looking for
   let desiredBinds = [
     'evtUseItem1',
     'evtUseItem2',
@@ -192,64 +97,74 @@ document.querySelector('#doIt').addEventListener('click', function() {
     'evtCastAvatarSpell1'
   ]
 
-  let smartOptions = [
-    'evtUseVisionItemsmart',
-    'evtUseItem6smart',
-    'evtUseItem5smart',
-    'evtUseItem4smart',
-    'evtUseItem3smart',
-    'evtUseItem2smart',
-    'evtUseItem1smart',
-    'evtCastSpell4smart',
-    'evtCastSpell3smart',
-    'evtCastSpell2smart',
-    'evtCastSpell1smart',
-    'evtCastAvatarSpell2smart',
-    'evtCastAvatarSpell1smart'
-  ]
-  readConfig(document.querySelector('#configLocation').value, desiredBinds, smartOptions);
+  //Start reading the config file, by supplying the file location and the binds we're looking for
+  readConfig(document.querySelector('#configLocation').value, desiredBinds);
 })
 
-function readConfig(location, desiredBinds, smartOptions){
+
+//reads config file and checks for existence of expected values
+function readConfig(location, desiredBinds){
+
+  //setup needed vars for checking/saving data
   let settingsFileJson = "";
   let totalNeeded = desiredBinds.length;
-  let errorReading = false;
+
   try {
+    //is the file real?
     if (fs.existsSync(location)) {
-      //file exists
+      //file exists, store it in memory
       settingsFileJson = require(location)
     }
   } catch(err) {
+    //There was either an error with the files insides, or a permission error opening it. ABORT.
     console.log(err)
     document.querySelector('#configLocation').classList.add('invalidConfig');
     return;
   }
 
-  console.log(settingsFileJson)
-
+  //The league config is a dangerous place. The input.ini is nested deep within arrays of arrays. Lets hope Riot doesn't change this often.
+  //TODO: Secure a better way of reliably getting to this location
   let input = settingsFileJson.files[1].sections[0].settings;
   let found = 0;
+
+  //Go through each keybind we're looking for by 'name'
   desiredBinds.some((name) => {
     let index = 0;
+    //Input is the input.ini object inside the config file
     for (key in input) {
       if (input[key].name.includes(name)) {
+        //Found a match for a setting
+
+        //Increment the number of settings found
         found++;
+
+        //Remember the old keybind value so we can show it to screen later
         keybinds[name].old = input[key].value;
+
+        //Also store where this keybind is in the array, it'll save us traversing this path again later to write the new keybind
         keybinds[name].arrayIndex = index;
+
+        //Remove this keybind from the array of ones to find, we dont want to find it again
         desiredBinds = desiredBinds.filter(item => item !== name)
       }
+
       index++;
     }
   })
 
+
   if (found != totalNeeded) {
+    //For some reason, we couldn't find all the keybindings we were expecting to.
+    //Abort, somethings wrong with their config file.
     document.querySelector('#configLocation').classList.add('invalidConfig');
     return;
   }
-  console.log(keybinds);
 
+  //All good, lets start making some new keybindings
   generateBindings(location, settingsFileJson)
-  console.log(keybinds);
+
+  //Keybinds made and stored in a global object,
+  //Lets show the user their new keybindings
   writeToDom();
 }
 
@@ -265,6 +180,7 @@ function generateBindings(location, settingsFileJson) {
 function makeBind() {
   let useModifiers = false;
   let useMultipleModifiers = false;
+
   if (scrambleSetting > 1){
     useModifiers = true;
   }
@@ -280,6 +196,9 @@ function makeBind() {
 
   if (useMultipleModifiers) {
     let newModifier = modifiers[getRandomInt(0,modifiers.length-1)]
+
+    //We need to prevent a situation where a keybind is [ctrl][ctrl][q] for example. We don't want the same
+    //modifier appearing twice. So this while loop prevents that
     while (randomKeybind == newModifier) {
       newModifier = "";
       newModifier = modifiers[getRandomInt(0,modifiers.length-1)];
@@ -287,6 +206,7 @@ function makeBind() {
     randomKeybind += newModifier;
   }
 
+  //Sets a keybind to a number about 26% of the time, and a letter 74% of the time.
   if (getRandomInt(0,100) > 74){
     randomKeybind += "[" + getRandomInt(0,9) + "]";
   } else {
@@ -298,56 +218,57 @@ function makeBind() {
 
 function writeBindings(location,settingsFileJson) {
   for (let entry in keybinds) {
+    //Now write the new keybinding to the config file, same location as where we found it
     settingsFileJson.files[1].sections[0].settings[keybinds[entry].arrayIndex].value = keybinds[entry].new;
   }
+
+  //Conver the object back to json and write it in the same location
   let newJson = JSON.stringify(settingsFileJson);
   fs.writeFile(location, newJson, 'utf8', (err) => {
     console.log(err);
   });
-  // const fs = require('fs');
-  // const writeStream = fs.createWriteStream(location);
-  // const pathName = writeStream.path;
-  //
-  // // write each value of the array on the file breaking line
-  // fileAsArray.forEach(value => writeStream.write(`${value}\n`));
-  //
-  // // the finish event is emitted when all data has been flushed from the stream
-  // writeStream.on('finish', () => {
-  //    console.log(`wrote all the array data to file ${pathName}`);
-  // });
-  //
-  // // handle the errors on the write process
-  // writeStream.on('error', (err) => {
-  //     console.error(`There is an error writing the file ${pathName} => ${err}`)
-  // });
-  //
-  // // close the stream
 }
 
+
 function writeToDom() {
+  //Boring javascript for creating divs and shoving them in the DOM with the correct classes.
+  //These show the keybindings, old and new, to the user
   let keybindContainer = document.querySelector('.keybinds');
   keybindContainer.innerHTML = ""
   for (var entry in keybinds) {
+    
+    //Each object entry has:
+    //friendlyName - the actual name of the keybind
+    //old - the old keybind
+    //new - the new keybind we just made
     let key = keybinds[entry]
+
+    //create div for the friendly name
     let keybindName = document.createElement('div')
     keybindName.classList.add('keyBindName','keyCell');
     keybindName.innerHTML = key.friendlyName;
     keybindContainer.append(keybindName)
 
+    //create div for the old keybind
     let oldKeybind = document.createElement('div')
     oldKeybind.classList.add('keyBindName','keyCell');
     oldKeybind.innerHTML = key.old;
     keybindContainer.append(oldKeybind)
 
+
+    //create div for the new keybind
     let newKeybind = document.createElement('div')
     newKeybind.classList.add('keyBindName','keyCell');
     newKeybind.innerHTML = key.new;
     keybindContainer.append(newKeybind)
   }
+
+  //Now everythings added, add a class which makes this part of the dom visible.
   keybindContainer.classList.add('showKeybinds')
   document.querySelector('.titles').classList.add('showKeybinds');
 }
 
+//When they change the slider, update a global variable
 function scrambleChange(element) {
   let value = element.value;
   let messsage = ''
