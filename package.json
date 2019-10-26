@@ -1,7 +1,7 @@
 {
-  "name": "electron-quick-start",
+  "name": "Keybind_Roulette_for_League",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "The best way to ruin your rank",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
@@ -9,20 +9,12 @@
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
     "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "League of Legends"
   ],
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^7.0.0"
-  },
-  "dependencies": {
+    "electron": "^7.0.0",
     "electron-reload": "^1.5.0"
-  },
-  "pkg": {
-    "assets": "assets/css/*"
   }
 }
